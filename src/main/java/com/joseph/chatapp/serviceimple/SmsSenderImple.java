@@ -24,7 +24,8 @@ public class SmsSenderImple implements SmsSender {
     public void sendSms(MessageDTO messageDTO) {
         PhoneNumber to = new PhoneNumber(messageDTO.getPhoneNumber());
         PhoneNumber from = new PhoneNumber(twilioConfig.getTrial_num());
-        String messageBody = messageDTO.getMessageBody();
+        String messageBody = "sent from user "+messageDTO.getPhoneNumber()+" : "+messageDTO.getMessageBody();
+
 
         MessageCreator creator = Message.creator(to, from, messageBody);
         creator.create();

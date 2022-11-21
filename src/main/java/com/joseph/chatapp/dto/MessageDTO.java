@@ -11,7 +11,6 @@ public class MessageDTO {
 
     private String phoneNumber;
     private String messageBody;
-
-
+    private String fromNumber;
 
 }

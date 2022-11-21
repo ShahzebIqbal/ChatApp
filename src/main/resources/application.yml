@@ -1,4 +1,16 @@
+#
+#server:
+#  port : 8085
+
+#Shahzeb's Trial Account
 twilio:
   account_sid: AC948f6f011b2b51e87e1f484239889068
   auth_token: 2ff402c5f49723472a3ea0d22378a09a
   trial_num: +17175276194
+
+
+#Joseph Redmond Premium Account
+#twilio:
+#  account_sid: AC2bff3c3716a49ab59c600e31587be1ff
+#  auth_token: dc92ce6ee10393693dcc56212206c20b
+#  trial_num: +17752454495
