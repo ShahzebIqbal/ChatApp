@@ -5,4 +5,6 @@ import com.joseph.chatapp.dto.MessageDTO;
 public interface SmsSender {
 
     void sendSms(MessageDTO messageDTO);
+
+    void sendOTP(MessageDTO messageDTO);
 }

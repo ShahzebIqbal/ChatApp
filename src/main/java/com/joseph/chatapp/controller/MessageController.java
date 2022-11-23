@@ -3,6 +3,7 @@ package com.joseph.chatapp.controller;
 
 import com.joseph.chatapp.dto.MessageDTO;
 import com.joseph.chatapp.dto.StatusDTO;
+import com.joseph.chatapp.serviceimple.OtpService;
 import com.joseph.chatapp.serviceimple.SmsSenderImple;
 import com.twilio.twiml.MessagingResponse;
 import com.twilio.twiml.messaging.Message;
@@ -23,38 +24,78 @@ public class MessageController {
 
     private final SmsSenderImple senderImpple;
 
+    private final OtpService otpService;
+
     @Autowired
-    public MessageController(SmsSenderImple senderImpple) {
+    public MessageController(SmsSenderImple senderImpple, OtpService otpService) {
         this.senderImpple = senderImpple;
+        this.otpService = otpService;
+    }
+
+    @PostMapping("/generateOTP")
+    public ResponseEntity<StatusDTO> generateOTP(String key,MessageDTO messageDTO){
+
+        if (key!=null){
+            int otp = otpService.generateOTP(key);
+            messageDTO.setMessageBody("Your OTP(One-Time-Password) is: "+otp);
+//            senderImpple.sendOTP(messageDTO);
+            return new ResponseEntity<>(new StatusDTO(HttpStatus.OK.value(),"success",otp),HttpStatus.OK);
+        }
+        return new ResponseEntity<>(new StatusDTO(HttpStatus.OK.value(),"Failed","Something went wrong"),HttpStatus.OK);
+
     }
 
 
     private final Map<String, Integer> messageCounts = new ConcurrentHashMap<>();
 
-    @PostMapping(value = "/reply", produces = "application/xml")
+    @PostMapping(value = "/abc", produces = "application/xml")
     @ResponseBody
-    public ResponseEntity<StatusDTO> handleSmsWebhook(@RequestParam("From") String from, @RequestParam("Body") String body){
+    public String handleSmsWebhook(
+            @RequestParam("From") String from,
+            @RequestParam("Body") String body){
 
-        if (from!=null && from.length()>1) {
-            int thisMessageCount = messageCounts.compute(from, (k,v) -> (v == null) ? 1 : v+1);
+        System.out.println("reply sent successfully");
 
-            String plural = (thisMessageCount > 1) ? "messages" : "message";
+        int thisMessageCount = messageCounts.compute(from, (k,v) -> (v == null) ? 1 : v+1);
+
+        String plural = (thisMessageCount > 1) ? "messages" : "message";
+        String message = String.format(
+                "☎️ Hello from Twilio. You've sent %d %s, and this one said '%s'",
+                thisMessageCount, plural, body);
+
+        return new MessagingResponse.Builder()
+                .message(new Message.Builder(message).build())
+                .build().toXml();
+    }
+
+//    private final Map<String, Integer> messageCounts = new ConcurrentHashMap<>();
+//
+//    @PostMapping(value = "/reply", produces = "application/xml")
+//    @ResponseBody
+//    public String handleSmsWebhook(@RequestParam("From") String from, @RequestParam("Body") String body){
+//        System.out.println("Service hit");
+//        if (from!=null && from.length()>1) {
+//            int thisMessageCount = messageCounts.compute(from, (k,v) -> (v == null) ? 1 : v+1);
+//
+//            String plural = (thisMessageCount > 1) ? "messages" : "message";
 //        String message = String.format(
 //                "☎️ Hello from Twilio. You've sent %d %s, and this one said '%s'",
 //                thisMessageCount, plural, body);
-
-            String message = new MessagingResponse.Builder()
-                    .message(new Message.Builder(body).build())
-                    .build().toXml();
-
-            if (message.length()>0 && !message.isEmpty()){
-                return new ResponseEntity<>(new StatusDTO(HttpStatus.OK.value(), "Success","Your Reply : "+body),HttpStatus.OK);
-            }
-
-            return new ResponseEntity<>(new StatusDTO(HttpStatus.OK.value(), "Failed","Could not send message"),HttpStatus.OK);
-        }
-        return new ResponseEntity<>(new StatusDTO(HttpStatus.OK.value(),"Failed","Please Enter Mobile Number"),HttpStatus.OK);
-    }
+//
+//            return new MessagingResponse.Builder()
+//                    .message(new Message.Builder(message).build())
+//                    .build().toXml();
+//
+//
+////            if (message.length()>0 && !message.isEmpty()){
+////                return new ResponseEntity<>(new StatusDTO(HttpStatus.OK.value(), "Success","Your Reply : "+message),HttpStatus.OK);
+////            }
+//
+////            return new ResponseEntity<>(new StatusDTO(HttpStatus.OK.value(), "Failed","Could not send message"),HttpStatus.OK);
+//        }
+//        return null;
+////        return new ResponseEntity<>(new StatusDTO(HttpStatus.OK.value(),"Failed","Please Enter Mobile Number"),HttpStatus.OK);
+//    }
 
 
     @PostMapping(value = "/sms")
