@@ -23,7 +23,6 @@ public class MessageController {
 
 
     private final SmsSenderImple senderImpple;
-
     private final OtpService otpService;
 
     @Autowired
@@ -33,10 +32,10 @@ public class MessageController {
     }
 
     @PostMapping("/generateOTP")
-    public ResponseEntity<StatusDTO> generateOTP(String key,MessageDTO messageDTO){
+    public ResponseEntity<StatusDTO> generateOTP(MessageDTO messageDTO){
 
-        if (key!=null){
-            int otp = otpService.generateOTP(key);
+        int otp = otpService.generateOTP();
+        if (otp>0){
             messageDTO.setMessageBody("Your OTP(One-Time-Password) is: "+otp);
 //            senderImpple.sendOTP(messageDTO);
             return new ResponseEntity<>(new StatusDTO(HttpStatus.OK.value(),"success",otp),HttpStatus.OK);
@@ -67,37 +66,6 @@ public class MessageController {
                 .message(new Message.Builder(message).build())
                 .build().toXml();
     }
-
-//    private final Map<String, Integer> messageCounts = new ConcurrentHashMap<>();
-//
-//    @PostMapping(value = "/reply", produces = "application/xml")
-//    @ResponseBody
-//    public String handleSmsWebhook(@RequestParam("From") String from, @RequestParam("Body") String body){
-//        System.out.println("Service hit");
-//        if (from!=null && from.length()>1) {
-//            int thisMessageCount = messageCounts.compute(from, (k,v) -> (v == null) ? 1 : v+1);
-//
-//            String plural = (thisMessageCount > 1) ? "messages" : "message";
-//        String message = String.format(
-//                "☎️ Hello from Twilio. You've sent %d %s, and this one said '%s'",
-//                thisMessageCount, plural, body);
-//
-//            return new MessagingResponse.Builder()
-//                    .message(new Message.Builder(message).build())
-//                    .build().toXml();
-//
-//
-////            if (message.length()>0 && !message.isEmpty()){
-////                return new ResponseEntity<>(new StatusDTO(HttpStatus.OK.value(), "Success","Your Reply : "+message),HttpStatus.OK);
-////            }
-//
-////            return new ResponseEntity<>(new StatusDTO(HttpStatus.OK.value(), "Failed","Could not send message"),HttpStatus.OK);
-//        }
-//        return null;
-////        return new ResponseEntity<>(new StatusDTO(HttpStatus.OK.value(),"Failed","Please Enter Mobile Number"),HttpStatus.OK);
-//    }
-
-
     @PostMapping(value = "/sms")
     public ResponseEntity<StatusDTO> message(MessageDTO messageDTO){
         if (messageDTO.getPhoneNumber()!=null){
